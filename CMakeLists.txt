@@ -15,3 +15,13 @@ file(GLOB SRC ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CSocketMFC SHARED ${SRC})
 # add the executable
+
+add_executable(server ${PROJECT_SOURCE_DIR}/server.cpp)
+add_executable(client ${PROJECT_SOURCE_DIR}/client.cpp)
+target_link_libraries(server ${PROJECT_SOURCE_DIR}/libCSocketMFC.so)
+target_link_libraries(client ${PROJECT_SOURCE_DIR}/libCSocketMFC.so)
+
+add_executable(server_udp ${PROJECT_SOURCE_DIR}/server_udp.cpp)
+add_executable(client_udp ${PROJECT_SOURCE_DIR}/client_udp.cpp)
+target_link_libraries(server_udp ${PROJECT_SOURCE_DIR}/libCSocketMFC.so)
+target_link_libraries(client_udp ${PROJECT_SOURCE_DIR}/libCSocketMFC.so)

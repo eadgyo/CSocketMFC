@@ -93,6 +93,7 @@ int CAsyncSocket::Receive(char* buffer, int nBufferLen)
 
     int len = 0;
     len = read(fdsocket, buffer, nBufferLen);
+    LOG_DEBUG("Receive " << buffer << " with length " << len);
     return len;
 }
 
@@ -102,24 +103,28 @@ int CAsyncSocket::Receive(char* buffer, int nBufferLen, int flags)
 
     int len = 0;
     len = recv(fdsocket, buffer, nBufferLen, flags);
+    LOG_DEBUG("Receive " << buffer << " with length " << len);
     return len;
 }
 
 int CAsyncSocket::Send(const char* buffer, int nBufferLen)
 {
     CHECK_SEND;
-
+    LOG_DEBUG("Send " << buffer << " with length " << nBufferLen);
     int len = 0;
     len = write(fdsocket, buffer, nBufferLen);
+    LOG_DEBUG("Send " << len << " written");
     return len;
 }
 
 int CAsyncSocket::Send(const char* buffer, int nBufferLen, int flags)
 {
     CHECK_SEND;
+    LOG_DEBUG("Send " << buffer << " with length " << nBufferLen);
 
     int len = 0;
     len = send(fdsocket, buffer, nBufferLen, flags);
+    LOG_DEBUG("Send " << len << " written");
     return len;
 }
 
@@ -141,9 +146,35 @@ void CAsyncSocket::RemoveMode(int mode)
 
 bool CAsyncSocket::Accept(CAsyncSocket& rConnectedSocket, sockaddr* lpSockAddr, socklen_t * lpSockAddrLen)
 {
-    int newfdsocket = accept(fdsocket, (struct sockaddr *) &lpSockAddr, lpSockAddrLen);
+    struct sockaddr_in clientSock;
+    socklen_t clientSockLen = sizeof(clientSock);
+
+    sockaddr* l_lpSockAddr = lpSockAddr;
+    socklen_t* l_lpSockAddrLen = lpSockAddrLen;
+    if (lpSockAddr == nullptr || l_lpSockAddrLen == nullptr)
+    {
+        LOG_DEBUG("Creating clientSockLen");
+        l_lpSockAddr = (struct sockaddr*)&clientSock;
+        l_lpSockAddrLen = &clientSockLen;
+    }
+    else
+    {
+        LOG_DEBUG("Using lpSockAddr passed by argument");
+    }
+
+    int newfdsocket = accept(fdsocket, (struct sockaddr *) &l_lpSockAddr, l_lpSockAddrLen);
 
     rConnectedSocket.Attach(newfdsocket, lpSockAddr);
+    return true;
+}
+
+bool CAsyncSocket::Connect(string strHostAddress, uint nHostPort)
+{
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(strHostAddress.c_str());
+    serv_addr.sin_port = htons(nHostPort);
+
+    THROW_IF(connect(fdsocket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0);
     return true;
 }
 
