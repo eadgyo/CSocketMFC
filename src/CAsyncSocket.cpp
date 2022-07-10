@@ -4,6 +4,12 @@ CAsyncSocket::CAsyncSocket()
 {
 }
 
+CAsyncSocket::CAsyncSocket(const CAsyncSocket& socket) : fdsocket(socket.fdsocket), lEvent(socket.lEvent), nShutdown(socket.nShutdown) 
+{
+    memcpy(&serv_addr, &socket.serv_addr, sizeof(serv_addr));
+}
+
+
 CAsyncSocket::~CAsyncSocket()
 {
 
@@ -107,6 +113,22 @@ int CAsyncSocket::Receive(char* buffer, int nBufferLen, int flags)
     return len;
 }
 
+int CAsyncSocket::ReceiveFrom(char* buffer, int nBufferLen, int flags)
+{
+    CHECK_READ;
+
+    int len = 0;
+    socklen_t size = sizeof(serv_addr);
+    len = recvfrom(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&serv_addr, &size);
+    LOG_DEBUG("Receive " << buffer << " with length " << len << " from " << inet_ntoa(serv_addr.sin_addr) << ":" << ntohs(serv_addr.sin_port));
+    return len;
+}
+
+CAsyncSocket& CAsyncSocket::operator=(const CAsyncSocket& socket)
+{
+    return * this;
+}
+
 int CAsyncSocket::Send(const char* buffer, int nBufferLen)
 {
     CHECK_SEND;
@@ -124,6 +146,17 @@ int CAsyncSocket::Send(const char* buffer, int nBufferLen, int flags)
 
     int len = 0;
     len = send(fdsocket, buffer, nBufferLen, flags);
+    LOG_DEBUG("Send " << len << " written");
+    return len;
+}
+
+int CAsyncSocket::SendTo(const char* buffer, int nBufferLen, int flags)
+{
+    CHECK_SEND;
+    LOG_DEBUG("SendTo " << buffer << " with length " << nBufferLen);
+
+    int len = 0;
+    len = sendto(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     LOG_DEBUG("Send " << len << " written");
     return len;
 }
@@ -166,6 +199,13 @@ bool CAsyncSocket::Accept(CAsyncSocket& rConnectedSocket, sockaddr* lpSockAddr, 
 
     rConnectedSocket.Attach(newfdsocket, lpSockAddr);
     return true;
+}
+
+void CAsyncSocket::Init(string strHostAddress, uint nHostPort)
+{
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(strHostAddress.c_str());
+    serv_addr.sin_port = htons(nHostPort);
 }
 
 bool CAsyncSocket::Connect(string strHostAddress, uint nHostPort)

@@ -30,6 +30,7 @@ private:
     
 public:
     CAsyncSocket(/* args */);
+    CAsyncSocket(const CAsyncSocket& socket);
     ~CAsyncSocket();
 
     /**
@@ -97,7 +98,13 @@ public:
      * @return connection success
      */
     bool Connect(string strHostAddress, uint nHostPort);
-
+    
+    /**
+     * @brief Establishes a connection to a peer socket. 
+     * 
+     * @return connection success
+     */
+    void Init(string strHostAddress, uint nHostPort);
 
     /**
      * @brief Create socket
@@ -155,7 +162,16 @@ public:
      */
     virtual int Receive(char* buffer, int nBufferLen, int flags);
 
-
+    /**
+     * @brief Receives data from socket
+     * 
+     * @param buffer 
+     * @param nBufferLen 
+     * @param flags
+     * @return int 
+     */
+    virtual int ReceiveFrom(char* buffer, int nBufferLen, int flags = 0);
+    
     /**
      * @brief Construct a new Send object
      * 
@@ -165,7 +181,7 @@ public:
      */
     virtual int Send(const char* buffer, int nBufferLen);
     
-        /**
+    /**
      * @brief Construct a new Send object
      * 
      * @param buffer data to be transmitted
@@ -174,6 +190,17 @@ public:
      * @return int 
      */
     virtual int Send(const char* buffer, int nBufferLen, int flags);
+    
+
+    /**
+     * @brief Construct a new Send object
+     * 
+     * @param buffer data to be transmitted
+     * @param nBufferLen length of data in buffer
+     * @param flags used flags to send
+     * @return int 
+     */
+    virtual int SendTo(const char* buffer, int nBufferLen, int flags = 0);
     
 
 
@@ -197,6 +224,13 @@ public:
      * @return false 
      */
     bool ShutDown(int nHow = 1);
+
+    /**
+     * @brief Clone object
+     * 
+     * @return CAsyncSocket 
+     */
+    CAsyncSocket& operator=(const CAsyncSocket& socket);
 
     // ---------- EVENT ----------
     /**
