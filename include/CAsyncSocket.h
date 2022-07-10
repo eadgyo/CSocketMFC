@@ -47,7 +47,18 @@ public:
      * @param mode
      */
     void RemoveMode(int mode);
+
+    /**
+     * @brief Set mode
+     * 
+     * @param mode 
+     * @return true 
+     * @return false 
+     */
+    int IOCtl(int command, int mode);
     
+    
+
     /**
      * @brief Accept a connection on a socket
      * 

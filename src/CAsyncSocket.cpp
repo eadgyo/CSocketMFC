@@ -211,6 +211,12 @@ void CAsyncSocket::RemoveMode(int mode)
     fcntl(fdsocket, F_SETFL, flags);
 }
 
+int CAsyncSocket::IOCtl(int command, int mode)
+{
+    return fcntl(fdsocket, command, mode);
+}
+
+
 
 bool CAsyncSocket::Accept(CAsyncSocket& rConnectedSocket, sockaddr* lpSockAddr, socklen_t * lpSockAddrLen)
 {
