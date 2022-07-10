@@ -6,6 +6,13 @@ using namespace std;
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <vector>
+#include <netinet/in.h>
+#include "debug.h"  
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define CHECK_READ if (this->nShutdown == 0 || this->nShutdown == 2) return 0; 
+#define CHECK_SEND if (this->nShutdown == 1 || this->nShutdown == 2) return 0; 
 
 class CAsyncSocket
 {
@@ -15,7 +22,10 @@ private:
      * 
      */
     SOCKET fdsocket;
-    std::vector<sockaddr> socks;
+    struct sockaddr_in serv_addr;
+    long lEvent = 0;
+    int nShutdown = -1;
+    
 public:
     CAsyncSocket(/* args */);
     ~CAsyncSocket();
@@ -29,7 +39,7 @@ public:
      * @return true 
      * @return false 
      */
-    virtual bool Accept(CAsyncSocket& rConnectedSocket, string * lpSockAddr = nullptr, int * lpSockAddrLen = nullptr);
+    virtual bool Accept(CAsyncSocket& rConnectedSocket, sockaddr * lpSockAddr = nullptr, socklen_t * lpSockAddrLen = nullptr);
     
     /**
      * @brief Attaches handle to CAsyncObject
@@ -38,17 +48,26 @@ public:
      * @return true 
      * @return false 
      */
-    bool Attach(SOCKET fdsocket);
+    bool Attach(SOCKET fdsocket, const sockaddr* lpSockAddr=nullptr, socklen_t *lpSockAddrLen=nullptr);
 
     /**
      * @brief Associates a local address with the socket
      * 
      * @param nSocketPort 
-     * @param strAddr 
      * @return true 
      * @return false 
      */
-    bool Bind(uint nSocketPort, string strAddr);
+    bool Bind(uint nSocketPort, string *straddr = nullptr);
+
+    /**
+     * @brief Associates a local address with the socket
+     * 
+     * @param nSocketPort 
+     * @return true 
+     * @return false 
+     */
+    bool Bind(const sockaddr* lpSockAddr, socklen_t *lpSockAddrLen);
+
 
     /**
      * @brief Close the socket 
@@ -62,16 +81,27 @@ public:
      */
     bool Connect(string strHostAddress, uint nHostPort);
 
+
     /**
      * @brief Create socket
      * 
-     * @param nSocketPort 
      * @param SocketType 
-     * @param socketAddress 
      * @return true 
      * @return false 
      */
-    bool Create(uint nSocketPort, int SocketType = 0, string * socketAddress = nullptr);
+    bool Socket(int SocketType=SOCK_STREAM, long lEvent=0, int nProtocolType=0, int nAddressFormat=AF_INET);
+
+    /**
+     * @brief Create socket and attach to address
+     * 
+     * @param nSocketPort 
+     * @param SocketType 
+     * @param lEvent 
+     * @param straddr 
+     * @return true 
+     * @return false 
+     */
+    bool Create(uint nSocketPort=0, int SocketType = SOCK_STREAM, long lEvent = 0, string *straddr = nullptr);
 
     /**
      * @brief Detach socket
@@ -117,7 +147,7 @@ public:
      * @return true 
      * @return false 
      */
-    virtual bool SetSockOpt( int optname, int *optVal, int optlen, int level = SOL_SOCKET);
+    virtual bool SetSockOpt( int optname =  SO_REUSEADDR | SO_REUSEPORT, int optVal = 1, int level = SOL_SOCKET);
 
     /**
      * @brief Disable sends receives or both on the socket

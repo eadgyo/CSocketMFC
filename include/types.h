@@ -1,3 +1,3 @@
 #pragma once
 typedef unsigned int uint;
-typedef SOCKET int;
+typedef int SOCKET;

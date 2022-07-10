@@ -14,28 +14,23 @@ void CSocket::CancelBlockingCall()
 {
 
 }
-bool CSocket::Create(uint nSocketPort, int SocketType, string socketAddress)
-{
-
-}
 
 bool CSocket::IsBlocking()
 {
-
+    return false;
 }
 
 bool CSocket::OnMessagePending()
 {
-
+    return false;
 }
-
 
 bool Close()
 {
-
+    return false;
 }
 
 bool OnClose()
 {
-    
+    return false;
 }
