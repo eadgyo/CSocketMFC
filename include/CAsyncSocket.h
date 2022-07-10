@@ -146,6 +146,17 @@ public:
     virtual int Receive(char* buffer, int nBufferLen);
 
     /**
+     * @brief Receives data from socket
+     * 
+     * @param buffer 
+     * @param nBufferLen 
+     * @param flags
+     * @return int 
+     */
+    virtual int Receive(char* buffer, int nBufferLen, int flags);
+
+
+    /**
      * @brief Construct a new Send object
      * 
      * @param buffer data to be transmitted
@@ -154,6 +165,18 @@ public:
      */
     virtual int Send(const char* buffer, int nBufferLen);
     
+        /**
+     * @brief Construct a new Send object
+     * 
+     * @param buffer data to be transmitted
+     * @param nBufferLen length of data in buffer
+     * @param flags used flags to send
+     * @return int 
+     */
+    virtual int Send(const char* buffer, int nBufferLen, int flags);
+    
+
+
     /**
      * @brief Set the Sock Option
      * 

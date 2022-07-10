@@ -96,12 +96,30 @@ int CAsyncSocket::Receive(char* buffer, int nBufferLen)
     return len;
 }
 
+int CAsyncSocket::Receive(char* buffer, int nBufferLen, int flags)
+{
+    CHECK_READ;
+
+    int len = 0;
+    len = recv(fdsocket, buffer, nBufferLen, flags);
+    return len;
+}
+
 int CAsyncSocket::Send(const char* buffer, int nBufferLen)
 {
     CHECK_SEND;
 
     int len = 0;
     len = write(fdsocket, buffer, nBufferLen);
+    return len;
+}
+
+int CAsyncSocket::Send(const char* buffer, int nBufferLen, int flags)
+{
+    CHECK_SEND;
+
+    int len = 0;
+    len = send(fdsocket, buffer, nBufferLen, flags);
     return len;
 }
 
