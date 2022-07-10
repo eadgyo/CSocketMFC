@@ -107,6 +107,15 @@ public:
     void Init(string strHostAddress, uint nHostPort);
 
     /**
+     * @brief Create socket addr in
+     * 
+     * @param strHostAddress 
+     * @param nHostPort 
+     * @return sockaddr_in 
+     */
+    sockaddr_in CreateSockAddrIn(string strHostAddress, uint nHostPort);
+    
+    /**
      * @brief Create socket
      * 
      * @param SocketType 
@@ -170,8 +179,19 @@ public:
      * @param flags
      * @return int 
      */
-    virtual int ReceiveFrom(char* buffer, int nBufferLen, int flags = 0);
+    virtual int ReceiveFrom(char* buffer, int nBufferLen, string& socketAddress, uint& socketPort, int flags = 0);
     
+    /**
+     * @brief Receives data from socket
+     * 
+     * @param buffer 
+     * @param nBufferLen 
+     * @param flags
+     * @return int 
+     */
+    virtual int ReceiveFrom(char* buffer, int nBufferLen, sockaddr* lpSockAddr, socklen_t *lpSockAddrLen, int flags = 0);
+    
+
     /**
      * @brief Construct a new Send object
      * 
@@ -193,14 +213,24 @@ public:
     
 
     /**
-     * @brief Construct a new Send object
+     * @brief SendTo data from socket
      * 
-     * @param buffer data to be transmitted
-     * @param nBufferLen length of data in buffer
-     * @param flags used flags to send
+     * @param buffer 
+     * @param nBufferLen 
+     * @param flags
      * @return int 
      */
-    virtual int SendTo(const char* buffer, int nBufferLen, int flags = 0);
+    virtual int SendTo(char* buffer, int nBufferLen, string socketAddress, uint socketPort, int flags = 0);
+    
+    /**
+     * @brief SendTo data from socket
+     * 
+     * @param buffer 
+     * @param nBufferLen 
+     * @param flags
+     * @return int 
+     */
+    virtual int SendTo(char* buffer, int nBufferLen, sockaddr* lpSockAddr, socklen_t lpSockAddrLen, int flags = 0);
     
 
 

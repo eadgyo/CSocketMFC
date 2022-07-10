@@ -12,37 +12,37 @@ int main(int argc, char *argv[])
     asyncSocket.SetSockOpt();
     asyncSocket.Bind(4001);
 
-    CAsyncSocket clientSocket = asyncSocket;
+    struct sockaddr_in client;
+    socklen_t lenClient = sizeof(client);
+    struct sockaddr* pClient = (struct sockaddr*)&client;
+    asyncSocket.CreateSockAddrIn("127.0.0.1", 4001);
+
     LOG_INFO("Accepting first client");
 
     char reception[255];
     LOG_INFO("Starting exchange");
 
-    //asyncSocket.Accept(clientSocket);
-    clientSocket.ReceiveFrom(reception, sizeof(reception));
+    asyncSocket.ReceiveFrom(reception, sizeof(reception), (struct sockaddr*)&client, &lenClient);
     std::cout << "\t\t\t\tClient: " << reception << std::endl;
 
 
     std::cout << ">>" << "Bonjour Ronan!" << std::endl;
-    clientSocket.SendTo("Bonjour Ronan!", sizeof("Bonjour Ronan!"));
+    asyncSocket.SendTo("Bonjour Ronan!", sizeof("Bonjour Ronan!"), pClient, lenClient);
 
    
-    clientSocket.ReceiveFrom(reception, sizeof(reception));
+    asyncSocket.ReceiveFrom(reception, sizeof(reception), pClient, &lenClient);
     std::cout << "\t\t\t\tClient: " << reception << std::endl;
 
     sleep(2);
     std::cout <<">>" << "Ca va ?" << std::endl;
-    clientSocket.SendTo("Ca va ?", sizeof("Ca va ?"));
+    asyncSocket.SendTo("Ca va ?", sizeof("Ca va ?"), pClient, lenClient);
 
-    clientSocket.ReceiveFrom(reception, sizeof(reception));
+    asyncSocket.ReceiveFrom(reception, sizeof(reception), pClient, &lenClient);
     std::cout << "\t\t\t\tClient: " << reception << std::endl;
 
     std::cout <<">>" << "EXIT" << std::endl;
-    clientSocket.SendTo("EXIT", sizeof("EXIT"));
+    asyncSocket.SendTo("EXIT", sizeof("EXIT"), pClient, lenClient);
 
-
-    clientSocket.ShutDown();
-    clientSocket.Close();
     asyncSocket.Close();
     
     return 0;

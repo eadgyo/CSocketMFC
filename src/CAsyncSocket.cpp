@@ -113,14 +113,31 @@ int CAsyncSocket::Receive(char* buffer, int nBufferLen, int flags)
     return len;
 }
 
-int CAsyncSocket::ReceiveFrom(char* buffer, int nBufferLen, int flags)
+int CAsyncSocket::ReceiveFrom(char* buffer, int nBufferLen, string& socketAddress, uint& socketPort, int flags)
 {
     CHECK_READ;
 
     int len = 0;
-    socklen_t size = sizeof(serv_addr);
-    len = recvfrom(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&serv_addr, &size);
-    LOG_DEBUG("Receive " << buffer << " with length " << len << " from " << inet_ntoa(serv_addr.sin_addr) << ":" << ntohs(serv_addr.sin_port));
+    struct sockaddr_in client;
+    socklen_t size = sizeof(client);
+
+    len = recvfrom(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&client, &size);
+    LOG_DEBUG("Receive " << buffer << " with length " << len << " from " << inet_ntoa(client.sin_addr) << ":" << ntohs(client.sin_port));
+    
+    socketAddress = inet_ntoa(client.sin_addr);
+    socketPort = ntohs(client.sin_port);
+
+    return len;
+}
+
+
+int CAsyncSocket::ReceiveFrom(char* buffer, int nBufferLen, sockaddr* lpSockAddr, socklen_t *lpSockAddrLen, int flags)
+{
+    CHECK_READ;
+    
+    int len = 0;
+    len = recvfrom(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)lpSockAddr, lpSockAddrLen);
+    LOG_DEBUG("Receive " << buffer << " with length " << len << " from " << inet_ntoa(((struct sockaddr_in*)lpSockAddr)->sin_addr) << ":" << ntohs(((struct sockaddr_in*)lpSockAddr)->sin_port));
     return len;
 }
 
@@ -150,17 +167,35 @@ int CAsyncSocket::Send(const char* buffer, int nBufferLen, int flags)
     return len;
 }
 
-int CAsyncSocket::SendTo(const char* buffer, int nBufferLen, int flags)
+
+    
+
+int CAsyncSocket::SendTo(char* buffer, int nBufferLen, string socketAddress, uint socketPort, int flags)
+{
+    CHECK_SEND;
+    LOG_DEBUG("SendTo " << buffer << " with length " << nBufferLen << " to address " << socketAddress << ":" << socketPort);
+
+    struct sockaddr_in client;
+    client.sin_family = AF_INET;
+    client.sin_addr.s_addr = inet_addr(socketAddress.c_str());
+    client.sin_port = htons(socketPort); 
+
+    int len = 0;
+    len = sendto(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&client, sizeof(client));
+    LOG_DEBUG("Send " << len << " written");
+    return len;
+}
+
+int CAsyncSocket::SendTo(char* buffer, int nBufferLen, sockaddr* lpSockAddr, socklen_t lpSockAddrLen, int flags)
 {
     CHECK_SEND;
     LOG_DEBUG("SendTo " << buffer << " with length " << nBufferLen);
 
     int len = 0;
-    len = sendto(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    len = sendto(fdsocket, buffer, nBufferLen, flags, (struct sockaddr*)lpSockAddr, lpSockAddrLen);
     LOG_DEBUG("Send " << len << " written");
     return len;
 }
-
 
 void CAsyncSocket::AddMode(int mode)
 {
@@ -195,7 +230,7 @@ bool CAsyncSocket::Accept(CAsyncSocket& rConnectedSocket, sockaddr* lpSockAddr, 
         LOG_DEBUG("Using lpSockAddr passed by argument");
     }
 
-    int newfdsocket = accept(fdsocket, (struct sockaddr *) &l_lpSockAddr, l_lpSockAddrLen);
+    int newfdsocket = accept(fdsocket, (struct sockaddr *) l_lpSockAddr, l_lpSockAddrLen);
 
     rConnectedSocket.Attach(newfdsocket, lpSockAddr);
     return true;
@@ -206,6 +241,15 @@ void CAsyncSocket::Init(string strHostAddress, uint nHostPort)
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(strHostAddress.c_str());
     serv_addr.sin_port = htons(nHostPort);
+}
+
+sockaddr_in CAsyncSocket::CreateSockAddrIn(string strHostAddress, uint nHostPort)
+{
+    struct sockaddr_in client;
+    client.sin_family = AF_INET;
+    client.sin_addr.s_addr = inet_addr(strHostAddress.c_str());
+    client.sin_port = htons(nHostPort);
+    return client;
 }
 
 bool CAsyncSocket::Connect(string strHostAddress, uint nHostPort)

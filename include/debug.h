@@ -1,8 +1,8 @@
 #pragma once
 #include <string.h>
-#define LOG_LEVEL_DEBUG 0
-#define LOG_LEVEL_TRACE 0
-#define LOG_LEVEL_INFO 0
+#define LOG_LEVEL_DEBUG 1
+#define LOG_LEVEL_TRACE 1
+#define LOG_LEVEL_INFO 1
 
 #define LOG_INFO(val) if(LOG_LEVEL_INFO) std::cout << "LOG_INFO::" << __FUNCTION__ << "()-> " << val <<  std::endl;
 #define LOG_TRACE(val) if(LOG_LEVEL_TRACE) std::cout << "LOG_TRACE::" << __FUNCTION__ << "()-> " << val <<  std::endl;
