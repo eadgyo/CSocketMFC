@@ -23,7 +23,7 @@ private:
      * @brief File descriptor on socket 
      * 
      */
-    SOCKET fdsocket;
+    SOCKET fdsocket = -1;
     struct sockaddr_in serv_addr;
     long lEvent = 0;
     int nShutdown = -1;
@@ -32,6 +32,11 @@ public:
     CAsyncSocket(/* args */);
     CAsyncSocket(const CAsyncSocket& socket);
     ~CAsyncSocket();
+
+    int getSocket()
+    {
+        return fdsocket;
+    };
 
     /**
      * @brief Set the Accept Blocking object
