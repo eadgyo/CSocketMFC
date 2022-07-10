@@ -106,6 +106,21 @@ int CAsyncSocket::Send(const char* buffer, int nBufferLen)
 }
 
 
+void CAsyncSocket::AddMode(int mode)
+{
+    int flags = fcntl(fdsocket, F_GETFL, 0);
+    flags |= mode;
+    fcntl(fdsocket, F_SETFL, flags);
+}
+
+void CAsyncSocket::RemoveMode(int mode)
+{
+    int flags = fcntl(fdsocket, F_GETFL, 0);
+    flags &= ~mode;
+    fcntl(fdsocket, F_SETFL, flags);
+}
+
+
 bool CAsyncSocket::Accept(CAsyncSocket& rConnectedSocket, sockaddr* lpSockAddr, socklen_t * lpSockAddrLen)
 {
     int newfdsocket = accept(fdsocket, (struct sockaddr *) &lpSockAddr, lpSockAddrLen);
