@@ -11,7 +11,7 @@ using namespace std;
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-
+#include "structures.h"
 
 #define CHECK_READ if (this->nShutdown == 0 || this->nShutdown == 2) return 0; 
 #define CHECK_SEND if (this->nShutdown == 1 || this->nShutdown == 2) return 0; 
