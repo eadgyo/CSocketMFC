@@ -8,6 +8,12 @@ Test::~Test()
 {
 }
 
+int Test::Set_Dir(char str[])
+{
+    std::cout << str << std::endl;
+    return 1;
+}
+
 void Test::Create_T1(T_TEST_1& t1)
 {
     for (int i = 0; i < 50; i++)

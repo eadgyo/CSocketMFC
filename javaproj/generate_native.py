@@ -1,3 +1,4 @@
+from array import array
 import re
 import codecs
 import sys
@@ -8,9 +9,7 @@ DEBUG_PRINT_ARGUMENT = False
 DEBUG_PRINT = True
 variables = {}
 
-functions_dict = {
-
-}
+functions_dict = {}
 
 current_function = ""
 
@@ -69,19 +68,22 @@ public final class JNINAME
 def register_variable(arg: re.match):
 	global functions_dict
 	global current_function
-	functions_dict[current_function]["argsArr"] += {
-		"match": arg,
+	arrayReg = re.compile("\[(\d*)\]")
+	variable_entry = {
 		"type": arg.group(1),
 		"reference": (True if (arg.group(2)) else False),
-		"name": arg.group(3)
+		"name": arg.group(3),
+		"isArray": re.match("\[\d+\]+", arg.group(4)) != None,
+		"array": arrayReg.findall(arg.group(4))
 	}
+	functions_dict[current_function]["args"] += [variable_entry]
+	return variable_entry
 
 def create_argument(arg: re.match):
-	register_variable(arg)
+	entry = register_variable(arg)
 	typeVar =  arg.group(1)
-	reference = (True if (arg.group(2)) else False)
 	name = arg.group(3)
-	contentArg = typeVar + " " + name
+	contentArg = typeVar + " " + name + ("[]" * len(entry["array"]))
 	return contentArg
 
 def register_function(fun : re.match):
@@ -92,7 +94,7 @@ def register_function(fun : re.match):
 		"name" : current_function,
 		"return": fun.group(1),
 		"argsFull": fun.group(3),
-		"argsArr": []
+		"args": []
 	}
 
 def create_function(fun: re.match):
@@ -101,7 +103,7 @@ def create_function(fun: re.match):
 	
 	# Create regex
 	arguments = fun.group(3)
-	regArg = re.compile("(\w+)\s*(&)?\s*(\w+)\s*(,|$)")
+	regArg = re.compile("(\w+)\s*(&)?\s*(\w+)(.*?)\s*(,|$)")
 	argIter = regArg.finditer(arguments)
 	
 	# Create arguments
@@ -128,7 +130,8 @@ def main(argv):
 	contentNative = create_default_content(argv[1], argv[2])
 	for fun in funcIter:
 		contentNative += "\t" + create_function(fun) + "\n\n"
-	contentNative += "}"
+	if len(argv) > 4 and argv[4] == "y":
+		contentNative += "}"
 	
 	# Write content
 	f2 = open(argv[1] + ".java", "w")
@@ -137,9 +140,9 @@ def main(argv):
 	print("Writing to file " + argv[1] + ".java ...")
 
 if __name__ == '__main__':
-	if len(sys.argv) == 0:
-		print("help:\n\tJNINAME\n\tLIBRARYNAME\n\tpath")
-		exit
-	read_variables()
-	main(sys.argv)
-	write_functions()
+	if len(sys.argv) == 1:
+		print("help:\n\tJNINAME\n\tLIBRARYNAME\n\tpath\n\tadd { at end: yes/empty")
+	else:
+		read_variables()
+		main(sys.argv)
+		write_functions()

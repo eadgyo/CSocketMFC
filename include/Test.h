@@ -13,6 +13,10 @@ public:
     Test(/* args */);
     ~Test();
 
+    __jniexport void Set_Test2(int test2[20][50]);
+
+    __jniexport int Set_Dir(char str[100]);
+
     __jniexport void Create_T1(T_TEST_1& t1);
 
     __jniexport void Create_T2(T_TEST_2& t2);
