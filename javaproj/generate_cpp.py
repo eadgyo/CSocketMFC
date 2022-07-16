@@ -179,7 +179,7 @@ def create_default_content(class_name):
 #include "helper.h"
 
 
-	'''
+'''
 	return content.replace("CLASS_NAME", class_name)
 
 def format_function_name(function):
@@ -272,13 +272,54 @@ def create_function_definition(function):
 		print("context" + str(context))
 		print("content" + content)
 	return content	
+
+def create_helper_structs(structName):
+	global replacement_java
+	global variables
+	if structName not in variables:
+		print("generate_helper_structs()->")
+		print("Error not found " + structName + " in variable")
+		return
 	
+	replacement_java["structName"] = {
+		"jni": "jobject",
+		"cpp": structName,
+		"conv_cpp": "ConvertTo_" + structName + "(env, VARIABLE, OUTPUT)",
+		"conv_jni": "NOT IMPLEMENTED",
+		"jvm": "L"
+	}
+	content = "static void ConvertTo_" + structName + "(JNI *env, jobject jobj, " + structName + "& obj)\n{\n"
+	structVariables = variables[structName]
+	contentCore = "jfieldID fieldID;\n"
+	
+	for v in structVariables:
+		structVar = structVariables[v]
+		typeName = structVar["variable_type"] + ("[]" * len(structVar["array_content"]))
+		replacementEntry = get_corresponding_replacement(typeName)
+		variableCPPName = "obj."+ structVar["variable_name"]
+		if replacementEntry == None:
+			contentCore += "//" + variableCPPName + " off type " + typeName + " not resolved!\n"  
+			continue
+
+		variableJNINamePreparation = "fieldID = getObjectFieldId(env, jobj," + structVar["variable_name"] + ", " + replacementEntry["jvm"] + ");\n"
+		variableJNIName = "env->Get" + replacementEntry["jni"][1:] + "Field(env, jobj, fieldID)" 
+		
+		contentCore += variableJNINamePreparation
+		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName)
+
+	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
+	content += "\n}\n"
+	return content
 
 	
 def main(argv):
 	global functions_dict
 	global context
 	content = create_default_content(argv[1])
+	for v in variables:
+		content += create_helper_structs(v)
+		content += "\n"
+	
 	context["cppClassVariable"] = argv[2]
 	for functionName in functions_dict:
 		function = functions_dict[functionName]
