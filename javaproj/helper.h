@@ -114,3 +114,16 @@ static T *getObject(JNIEnv *env, jobject self)
 	jlong nativeObjectPointer = env->GetLongField(self, nativeObjectPointerID);
 	return reinterpret_cast<T *>(nativeObjectPointer);
 }
+
+
+static jfieldID getObjectFieldId(JNIEnv *env, jobject self, const char* fieldName, const char* fieldType)
+{
+	jclass cls = env->GetObjectClass(self);
+	if (!cls)
+		env->FatalError("GetObjectClass failed");
+
+	jfieldID fieldID = env->GetFieldID(cls, fieldName, fieldType);
+	if (!fieldID)
+		env->FatalError("GetFieldID failed");
+	return fieldID;
+}
