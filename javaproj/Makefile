@@ -1,6 +1,6 @@
 JAVA_HOME = /usr/lib/jvm/java-8-openjdk
 
-CXX= gcc
+CXX= g++
 LDFLAGS=../libCSocketMFC.so
 
 CXXFLAGS += -Wall
@@ -11,13 +11,18 @@ all: libcasyncsocket_jni.so MainJNI.class
 
 all2: helper.so 
 
-all3: libDLL_TIM_JNI.so helper.so 
+all3: result.so
+
+all4: libDLL_TIM_JNI.so helper.so 
 
 clean:
 	rm JNICAsyncSocket.class JNICAsyncSocket.h libcasyncsocket_jni.so 
 
 helper.so: helper.o
 helper.o: helper.h
+result.so: result.o
+result.o: result.cpp
+
 libDLL_TIM_JNI.o: JNITest.h JNITest.cpp
 libDLL_TIM_JNI.so: libDLL_TIM_JNI.o
 
@@ -37,7 +42,7 @@ MainJNI.class : MainJNI.java
 	javac $<
 
 %.h: %.class
-	javah -cp . $(<:.class=)
+	javah -cp ./structs/ $(<:.class=)
 
 
 

@@ -187,6 +187,7 @@ def format_function_name(function):
 	return function["name"]
 
 def get_corresponding_replacement(typeName):
+	global replacement_java
 	if typeName in replacement_java:
 		return replacement_java[typeName]
 	else:
@@ -201,6 +202,7 @@ def create_jvariable_name(arg):
 
 def format_variable(arg):
 	global context
+
 	typeName = arg["type"]
 	variableName = arg["name"]
 	isArray = arg["isArray"]
@@ -212,6 +214,7 @@ def format_variable(arg):
 		return format_jni(replacementEntry["jni"], create_jvariable_name(arg), array)
 	else:
 		context["currentParam"] = "obj" + str(context["currentParamIndex"])
+		print(typeName + " Not found in variables dictionary !! Generating default " + "obj" + str(context["currentParamIndex"]))
 		return "jobject obj" + str(context["currentParamIndex"])
 
 def format_conversion(arg):
@@ -295,7 +298,7 @@ def create_helper_structs(structName):
 		print("Error not found " + structName + " in variable")
 		return
 	
-	replacement_java["structName"] = {
+	replacement_java[structName] = {
 		"jni": "jobject",
 		"cpp": structName,
 		"conv_cpp": "ConvertTo_" + structName + "(env, VARIABLE, OUTPUT)",
