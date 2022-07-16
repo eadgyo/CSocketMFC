@@ -279,11 +279,11 @@ def format_get_field_env(replacementEntry):
 	content = "env->Get"
 	if "Array" in replacementEntry["jni"]:
 		content += "Object"
-		content += "Field(env, jobj, fieldID)" 
+		content += "Field(jobj, fieldID)" 
 		content = "reinterpret_cast<" + replacementEntry["jni"] + ">(" + content + ")"    
 	else:
 		content += (replacementEntry["jni"][1:]).capitalize()
-		content += "Field(env, jobj, fieldID)" 
+		content += "Field(jobj, fieldID)" 
 	
 	return content
 	
