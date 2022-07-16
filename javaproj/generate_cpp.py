@@ -224,7 +224,15 @@ def format_conversion(arg):
 	
 	if replacementEntry != None:
 		context["currentVariable"] = variableName
-		return format_cpp(replacementEntry["cpp"], variableName, array) + " = " + format_cpp_conv(replacementEntry["conv_cpp"], context["currentParam"], array) + ";\n"
+		content = ""
+		content = format_cpp(replacementEntry["cpp"], variableName, array)
+		if "OUTPUT" in replacementEntry["cpp"]:
+			content += " = "
+		else:
+			content += ";\n" 
+		result =  format_cpp_conv(replacementEntry["conv_cpp"], context["currentParam"], array) + ";\n"
+		content += result.replace("OUTPUT", variableName)
+		return content
 	else:
 		return ""
 
