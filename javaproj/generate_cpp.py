@@ -11,7 +11,7 @@ DEBUG_PRINT = True
 variables = {}
 functions_dict = {}
 replacement_java = replacement_variable.replacement_java
-
+JNIClassName = ""
 
 context = {
 	"cppClassVariable": "", 
@@ -169,6 +169,7 @@ def read_functions():
 
 
 def create_default_content(class_name):
+	global JNIClassName
 	content = '''
 
 #include <string>
@@ -180,11 +181,21 @@ def create_default_content(class_name):
 #include "structures.h"
 #include "Test.h"
 
+JNIEXPORT jlong JNICALL Java_JNITest_nativeNew
+  (JNIEnv *env, jobject self)
+{
+	Test *test = new Test();
+	return reinterpret_cast<jlong>(test);
+}
+
+
+
 '''
+	JNIClassName = class_name
 	return content.replace("CLASS_NAME", class_name)
 
 def format_function_name(function):
-	return function["name"]
+	return function["name"].replace("_", "_1")
 
 def get_corresponding_replacement(typeName):
 	global replacement_java
@@ -252,9 +263,10 @@ def reset_context():
 
 def create_function_definition(function):
 	global context
+	global JNIClassName
 	content = '''Java_FUNCTION_NAME
   (JNIEnv *env, jobject self'''
-	content = content.replace("FUNCTION_NAME", format_function_name(function))
+	content = content.replace("FUNCTION_NAME", JNIClassName + "_" + format_function_name(function))
 	reset_context()
 	for a in function["args"]:
 		context["functionParams"] += ", "
