@@ -60,7 +60,7 @@ static void ConvertToIntArrayArray(JNIEnv *env, jobjectArray jintint, int (& new
 	}
 	for (int i = 0; i < size; i++)
 	{
-		jintArray jintArrayTmp = reinterpret_cast<jfloatArray>(env->GetObjectArrayElement(jintint, static_cast<jsize>(i)));
+		jintArray jintArrayTmp = reinterpret_cast<jintArray>(env->GetObjectArrayElement(jintint, static_cast<jsize>(i)));
 		ConvertToIntArray<size2>(env, jintArrayTmp, new_ints[i]);
 	}
 }
