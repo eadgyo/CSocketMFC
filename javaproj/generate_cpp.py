@@ -177,7 +177,8 @@ def create_default_content(class_name):
 
 #include "CLASS_NAME.h"
 #include "helper.h"
-
+#include "structures.h"
+#include "Test.h"
 
 '''
 	return content.replace("CLASS_NAME", class_name)
@@ -273,6 +274,19 @@ def create_function_definition(function):
 		print("content" + content)
 	return content	
 
+
+def format_get_field_env(replacementEntry):
+	content = "env->Get"
+	if "Array" in replacementEntry["jni"]:
+		content += "Object"
+		content += "Field(env, jobj, fieldID)" 
+		content = "reinterpret_cast<" + replacementEntry["jni"] + ">(" + content + ")"    
+	else:
+		content += (replacementEntry["jni"][1:]).capitalize()
+		content += "Field(env, jobj, fieldID)" 
+	
+	return content
+	
 def create_helper_structs(structName):
 	global replacement_java
 	global variables
@@ -288,7 +302,7 @@ def create_helper_structs(structName):
 		"conv_jni": "NOT IMPLEMENTED",
 		"jvm": "L"
 	}
-	content = "static void ConvertTo_" + structName + "(JNI *env, jobject jobj, " + structName + "& obj)\n{\n"
+	content = "static void ConvertTo_" + structName + "(JNIEnv *env, jobject jobj, " + structName + "& obj)\n{\n"
 	structVariables = variables[structName]
 	contentCore = "jfieldID fieldID;\n"
 	
@@ -301,11 +315,13 @@ def create_helper_structs(structName):
 			contentCore += "//" + variableCPPName + " off type " + typeName + " not resolved!\n"  
 			continue
 
-		variableJNINamePreparation = "fieldID = getObjectFieldId(env, jobj," + structVar["variable_name"] + ", " + replacementEntry["jvm"] + ");\n"
-		variableJNIName = "env->Get" + replacementEntry["jni"][1:] + "Field(env, jobj, fieldID)" 
+		variableJNINamePreparation = "fieldID = getObjectFieldId(env, jobj,\"" + structVar["variable_name"] + "\", \"" + replacementEntry["jvm"] + "\");\n"
+		variableJNIName = format_get_field_env(replacementEntry)
 		
 		contentCore += variableJNINamePreparation
-		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName)
+		if "OUTPUT" not in replacementEntry["conv_cpp"]:
+			contentCore += variableCPPName + " = "
+		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName) + ";\n"
 
 	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
 	content += "\n}\n"
