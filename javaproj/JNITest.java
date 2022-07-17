@@ -9,7 +9,6 @@ public final class JNITest
 		try
         {
 			System.loadLibrary("result");
-			System.out.println ( "Native code loading...") ;
         }
         catch ( UnsatisfiedLinkError e )
         {
@@ -47,6 +46,8 @@ public final class JNITest
 	public native void Test1(T_TEST_1 t1);
 
 	public native void Test2(T_TEST_2 t2);
+
+	public native void Print_T1_SIMPLE(T_TEST_1 t1);
 
 	public native void Print_T1(T_TEST_1 t1);
 
