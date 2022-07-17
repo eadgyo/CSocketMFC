@@ -95,10 +95,9 @@ def format_call(function):
 
 	# Create return
 	content += call_content + ";\n"
-	content += str(returnStr)
 	if DEBUG_PRINT:
-		print("content=" + content)
-	return content
+		print("content=" + content + " result=" + returnStr)
+	return content, returnStr
 
 def format_cpp_conv(cpp_conv, variableName, array=[]):
 	global context
@@ -251,6 +250,23 @@ def format_conversion(arg):
 	else:
 		return ""
 
+def format_conversion_back_jni(arg):
+	global context
+	typeName = arg["type"]
+	variableName = arg["name"]
+	isArray = arg["isArray"]
+	array = arg["array"]
+	print("format_conversion()-> array=" + str(array))
+	replacementEntry = get_corresponding(arg)
+	
+	if replacementEntry != None:
+		result =  format_jni_conv(replacementEntry["conv_jni"], variableName, array) + ";\n"
+		content = result.replace("OUTPUT", context["currentParam"])
+		return content
+	else:
+		return ""
+
+
 def reset_context():
 	global context
 	context["currentVariable"] = "null"
@@ -268,14 +284,19 @@ def create_function_definition(function):
   (JNIEnv *env, jobject self'''
 	content = content.replace("FUNCTION_NAME", JNIClassName + "_" + format_function_name(function))
 	reset_context()
+	functionCorePost = ""
 	for a in function["args"]:
 		context["functionParams"] += ", "
 		argcontent = format_variable(a)
 		add_arg_raw(argcontent)
 		context["functionParams"] += argcontent
 		context["functionCore"] += format_conversion(a)
-	
-	context["functionCore"] += format_call(function)
+		functionCorePost += format_conversion_back_jni(a)
+	contentCall, returnStr = format_call(function)
+	context["functionCore"] += contentCall
+	context["functionCore"] += functionCorePost
+	context["functionCore"] += returnStr
+
 	content = "JNIEXPORT " + context["return"] + " JNICALL " + content
 
 	content += context["functionParams"] + ")\n"
@@ -340,7 +361,7 @@ def create_helper_structs_to_cpp(structName):
 		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName) + ";\n"
 
 	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
-	content += "\n}\n"
+	content += "}\n\n"
 	return content
 
 def create_helper_structs_to_jni(structName):
@@ -373,7 +394,7 @@ def create_helper_structs_to_jni(structName):
 
 
 	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
-	content += "\n}\n"
+	content += "}\n\n"
 	return content
 
 
@@ -392,7 +413,8 @@ def create_helper_structs(structName):
 		"conv_jni": "ConvertFrom_" + structName + "(env, VARIABLE, OUTPUT)",
 		"jvm": "L"
 	}
-	content = create_helper_structs_to_cpp(structName)
+	content = "// CONVERT " + structName + " //\n"
+	content += create_helper_structs_to_cpp(structName)
 	content += create_helper_structs_to_jni(structName)
 
 	return content
