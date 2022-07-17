@@ -25,14 +25,14 @@ replacement_java = {
 		"jni": "jintArray",
 		"cpp": "int VARIABLE[SIZE_1]",
 		"conv_cpp": "ConvertToIntArray<SIZE_1>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromIntArray<SIZE_1>(env, VARIABLE, OUTPUT)",
 		"jvm": "[I"
 	},
 	"int[][]" : {
 		"jni": "jobjectArray",
 		"cpp": "int VARIABLE[SIZE_1][SIZE_2]",
 		"conv_cpp": "ConvertToIntArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromIntArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)!",
 		"jvm": "[[I"
 	},
 	"float": {
@@ -46,14 +46,14 @@ replacement_java = {
 		"jni": "jfloatArray",
 		"cpp": "float VARIABLE[SIZE_1]",
 		"conv_cpp": "ConvertToFloatArray<SIZE_1>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromFloatArray<SIZE_1>(env, VARIABLE, OUTPUT)",
 		"jvm": "[F"
 	},
 	"float[][]": {
 		"jni": "jobjectArray",
 		"cpp": "float VARIABLE[SIZE_1][SIZE_2]",
 		"conv_cpp": "ConvertToFloatArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromFloatArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)",
 		"jvm": "[[F"
 	},
 	"char" : {
@@ -68,14 +68,14 @@ replacement_java = {
 		"cpp": "char VARIABLE[SIZE_1]",
 		"cpp2" : "char*",
 		"conv_cpp": "ConvertToCharArray<SIZE_1>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromCharArray<SIZE_1>(env, VARIABLE, OUTPUT)",
 		"jvm": "[C"
 	},
 	"char[][]" : {
 		"jni": "jobjectArray",
 		"cpp": "char VARIABLE[SIZE_1][SIZE_2]",
 		"conv_cpp": "ConvertToCharArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED!",
+		"conv_jni": "ConvertFromCharArrayArray<SIZE_1,SIZE_2>(env, VARIABLE, OUTPUT)",
 		"jvm": "[[C"
 	}
 }

@@ -301,23 +301,52 @@ def format_get_field_env(replacementEntry):
 		content += "Field(jobj, fieldID)" 
 	
 	return content
+
+def format_set_field_env(replacementEntry):
+	content = "env->Set"
+	if "Array" in replacementEntry["jni"]:
+		content += "Object"
+		content += "Field(jobj, fieldID, VALUE)"  
+	else:
+		content += (replacementEntry["jni"][1:]).capitalize()
+		content += "Field(jobj, fieldID, VALUE)" 
 	
-def create_helper_structs(structName):
-	global replacement_java
+	return content
+
+def create_helper_structs_to_cpp(structName):
 	global variables
-	if structName not in variables:
-		print("generate_helper_structs()->")
-		print("Error not found " + structName + " in variable")
-		return
-	
-	replacement_java[structName] = {
-		"jni": "jobject",
-		"cpp": structName,
-		"conv_cpp": "ConvertTo_" + structName + "(env, VARIABLE, OUTPUT)",
-		"conv_jni": "NOT IMPLEMENTED",
-		"jvm": "L"
-	}
+	global replacement_java
 	content = "static void ConvertTo_" + structName + "(JNIEnv *env, jobject jobj, " + structName + "& obj)\n{\n"
+	structVariables = variables[structName]
+	contentCore = "jfieldID fieldID;\n"
+	
+	# Creating variables conversions in 2 parts (GetField and Convert)
+	for v in structVariables:
+		structVar = structVariables[v]
+		typeName = structVar["variable_type"] + ("[]" * len(structVar["array_content"]))
+		replacementEntry = get_corresponding_replacement(typeName)
+		variableCPPName = "obj."+ structVar["variable_name"]
+		if replacementEntry == None:
+			contentCore += "//" + variableCPPName + " off type " + typeName + " not resolved!\n"  
+			continue
+
+		# Get Object
+		variableJNINamePreparation = "fieldID = getObjectFieldId(env, jobj,\"" + structVar["variable_name"] + "\", \"" + replacementEntry["jvm"] + "\");\n"
+		variableJNIName = format_get_field_env(replacementEntry)
+		
+		contentCore += variableJNINamePreparation
+		if "OUTPUT" not in replacementEntry["conv_cpp"]:
+			contentCore += variableCPPName + " = "
+		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName) + ";\n"
+
+	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
+	content += "\n}\n"
+	return content
+
+def create_helper_structs_to_jni(structName):
+	global variables
+	global replacement_java
+	content = "static void ConvertFrom_" + structName + "(JNIEnv *env, " + structName + "& obj, jobject& jobj)\n{\n"
 	structVariables = variables[structName]
 	contentCore = "jfieldID fieldID;\n"
 	
@@ -332,14 +361,40 @@ def create_helper_structs(structName):
 
 		variableJNINamePreparation = "fieldID = getObjectFieldId(env, jobj,\"" + structVar["variable_name"] + "\", \"" + replacementEntry["jvm"] + "\");\n"
 		variableJNIName = format_get_field_env(replacementEntry)
-		
+		variableJNINameSetter = format_set_field_env(replacementEntry)
+
 		contentCore += variableJNINamePreparation
-		if "OUTPUT" not in replacementEntry["conv_cpp"]:
-			contentCore += variableCPPName + " = "
-		contentCore += format_cpp_conv(replacementEntry["conv_cpp"], variableJNIName, structVar["array_content"]).replace("OUTPUT", variableCPPName) + ";\n"
+		core = format_jni_conv(replacementEntry["conv_jni"], variableCPPName, structVar["array_content"]).replace("OUTPUT", variableJNIName) 
+
+		if "OUTPUT" not in replacementEntry["conv_jni"]:
+			contentCore += variableJNINameSetter.replace("VALUE", core) + ";\n"
+		else:
+			contentCore += core + ";\n"
+
 
 	content += re.sub("\t$", "", re.sub("(^|\n)", "\\1\t", contentCore))
 	content += "\n}\n"
+	return content
+
+
+def create_helper_structs(structName):
+	global replacement_java
+	global variables
+	if structName not in variables:
+		print("generate_helper_structs()->")
+		print("Error not found " + structName + " in variable")
+		return
+	
+	replacement_java[structName] = {
+		"jni": "jobject",
+		"cpp": structName,
+		"conv_cpp": "ConvertTo_" + structName + "(env, VARIABLE, OUTPUT)",
+		"conv_jni": "ConvertFrom_" + structName + "(env, VARIABLE, OUTPUT)",
+		"jvm": "L"
+	}
+	content = create_helper_structs_to_cpp(structName)
+	content += create_helper_structs_to_jni(structName)
+
 	return content
 
 	

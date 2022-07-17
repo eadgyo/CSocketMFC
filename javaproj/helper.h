@@ -19,7 +19,7 @@ static void ConvertToCharArray(JNIEnv *env, jcharArray jcharArray, char (& strBu
 }
 
 template<int size1>
-static void ConvertFromCharArray(JNIEnv *env, char (& strBuf)[size1], jcharArray& jchararray)
+static void ConvertFromCharArray(JNIEnv *env, char (& strBuf)[size1], jcharArray&& jchararray)
 {
     jboolean isCopy;
 	jboolean isCopy2;
@@ -49,7 +49,7 @@ static void ConvertToCharArrayArray(JNIEnv *env, jobjectArray jcharchar, char (&
 }
 
 template<int size1, int size2>
-static void ConvertFromCharArrayArray(JNIEnv *env, char (& new_chars)[size1][size2], jobjectArray jcharchar)
+static void ConvertFromCharArrayArray(JNIEnv *env, char (& new_chars)[size1][size2], jobjectArray&& jcharchar)
 {
 	int size = static_cast<int>(env->GetArrayLength(jcharchar));
 	if (size != size1)
@@ -60,7 +60,7 @@ static void ConvertFromCharArrayArray(JNIEnv *env, char (& new_chars)[size1][siz
 	for (int i = 0; i < size; i++)
 	{
 		jcharArray jcharArrayTmp = reinterpret_cast<jcharArray>(env->GetObjectArrayElement(jcharchar, static_cast<jsize>(i)));
-		ConvertFromCharArray<size2>(env, new_chars[i], jcharArrayTmp);
+		ConvertFromCharArray<size2>(env, new_chars[i], std::move(jcharArrayTmp));
 	}
 }
 
@@ -81,7 +81,7 @@ static void ConvertToIntArray(JNIEnv *env, jintArray jintArray, int (& intBuf)[s
 }
 
 template<int size1>
-static void ConvertFromIntArray(JNIEnv *env,int (& intBuf)[size1],  jintArray& jintarray)
+static void ConvertFromIntArray(JNIEnv *env,int (& intBuf)[size1],  jintArray&& jintarray)
 {
     jboolean isCopy;
 	int size = env->GetArrayLength(jintarray);
@@ -115,7 +115,7 @@ static void ConvertToIntArrayArray(JNIEnv *env, jobjectArray jintint, int (& new
 
 
 template<int size1, int size2>
-static void ConvertFromIntArrayArray(JNIEnv *env, int (& new_ints)[size1][size2], jobjectArray& jintint)
+static void ConvertFromIntArrayArray(JNIEnv *env, int (& new_ints)[size1][size2], jobjectArray&& jintint)
 {
 	int size = static_cast<int>(env->GetArrayLength(jintint));
 	if (size != size1)
@@ -125,7 +125,7 @@ static void ConvertFromIntArrayArray(JNIEnv *env, int (& new_ints)[size1][size2]
 	for (int i = 0; i < size; i++)
 	{
 		jintArray jintArrayTmp = reinterpret_cast<jintArray>(env->GetObjectArrayElement(jintint, static_cast<jsize>(i)));
-		ConvertFromIntArray<size2>(env, new_ints[i], jintArrayTmp);
+		ConvertFromIntArray<size2>(env, new_ints[i], std::move(jintArrayTmp));
 	}
 }
 
@@ -146,7 +146,7 @@ static void ConvertToFloatArray(JNIEnv *env, jfloatArray jfloatarray, float (& f
 }
 
 template<int size1>
-static void ConvertFromFloatArray(JNIEnv *env, float (& floatBuf)[size1], jfloatArray& jfloatarray)
+static void ConvertFromFloatArray(JNIEnv *env, float (& floatBuf)[size1], jfloatArray&& jfloatarray)
 {
 	jboolean isCopy;
 	int size = env->GetArrayLength(jfloatarray);
@@ -180,7 +180,7 @@ static void ConvertToFloatArrayArray(JNIEnv *env, jobjectArray jfloatfloat, floa
 }
 
 template<int size1, int size2>
-static void ConvertFromFloatArrayArray(JNIEnv *env, float (& new_floats)[size1][size2], jobjectArray& jfloatfloat)
+static void ConvertFromFloatArrayArray(JNIEnv *env, float (& new_floats)[size1][size2], jobjectArray&& jfloatfloat)
 {
 	jboolean isCopy;
 	int size = env->GetArrayLength(jfloatfloat);
@@ -191,7 +191,7 @@ static void ConvertFromFloatArrayArray(JNIEnv *env, float (& new_floats)[size1][
 	for (int i = 0; i < size1; i++)
 	{
 		jfloatArray jfloatArrayTmp = reinterpret_cast<jfloatArray>(env->GetObjectArrayElement(jfloatfloat, static_cast<jsize>(i)));
-		ConvertFromFloatArray<size2>(env, new_floats[i], jfloatArrayTmp);
+		ConvertFromFloatArray<size2>(env, new_floats[i], std::move(jfloatArrayTmp));
 	}
 }
 
