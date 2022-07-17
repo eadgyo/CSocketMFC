@@ -20,7 +20,7 @@ void Test::Create_T1(T_TEST_1& t1)
     {
         strcpy(t1.chaine[i], "TEST " + i);
     }
-    strcpy(t1.chaine2, "TEST CHAINE2");
+    strcpy(t1.chaine2, "TEST CHAINE2\n");
     t1.entier1 = 1;
     t1.reel1 = 1.1f;
     for (int i = 0; i < 20; i++)
@@ -60,7 +60,7 @@ void Test::Test3(T_TEST_1& t1, T_TEST_2& t2)
 
 void Test::Test1(T_TEST_1& t1)
 {
-    print_T1(t1);
+    Print_T1(t1);
 
     LOG_INFO("Modifying t1..");
     strcpy(t1.chaine[20], "Modification de la chaine");
@@ -72,7 +72,7 @@ void Test::Test1(T_TEST_1& t1)
     t1.tabReel1[10][1] = 20.0f;
     t1.tabReel1[13][3] = 550.0f;
 
-    print_T1(t1);
+    Print_T1(t1);
 }
 
 void Test::Test2(T_TEST_2& t2)
@@ -89,12 +89,29 @@ void Test::Test2(T_TEST_2& t2)
     print_T2(t2);
 }
 
+void Test::Print_T1_SIMPLE(T_TEST_1& t1)
+{
+    std::cout << t1.entier1 << std::endl;
+    
+}
+
 void Test::Print_T1(T_TEST_1& t1)
 {
+    std::cout << "START T1" << std::endl;
+    /*std::cout << "chaine2 = " << t1.chaine2 << std::endl;
+    std::cout << "entier1 = " << t1.entier1 << std::endl;
+    std::cout << "reel1 = " << t1.reel1 << std::endl;
+    for (int i = 0; i < 20; i++)
+    {
+        std::cout << "tabEntier1["<<i<<"] = " << t1.tabEntier1[i] << std::endl;
+    }*/
     print_T1(t1);
+    std::cout << "END T1" << std::endl;
 }
 
 void Test::Print_T2(T_TEST_2& t2)
 {
+    std::cout << "START T2" << std::endl;
     print_T2(t2);
+    std::cout << "END T2" << std::endl;
 }

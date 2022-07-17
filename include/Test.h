@@ -28,6 +28,8 @@ public:
    
     __jniexport void Test2(T_TEST_2& t2);
 
+    __jniexport void Print_T1_SIMPLE(T_TEST_1& t1);
+
     __jniexport void Print_T1(T_TEST_1& t1);
 
     __jniexport void Print_T2(T_TEST_2& t2);

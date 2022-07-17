@@ -19,16 +19,34 @@ static void ConvertToCharArray(JNIEnv *env, jcharArray jcharArray, char (& strBu
 }
 
 template<int size1>
-static void ConvertFromCharArray(JNIEnv *env, char (& strBuf)[size1], jcharArray&& jchararray)
+static void ConvertFromCharArray(JNIEnv *env, char (& strBuf)[size1], jcharArray jchararray)
 {
+	int size = static_cast<int>(env->GetArrayLength(jchararray));
+	if (size != size1)
+	{
+		std::cout << "ArrayLength does not match, received " << size << " asked " << size1 << std::endl;
+		env->FatalError("ConvertFromCharArray()-> ArrayLength does not match, received");
+	}
+
     jboolean isCopy;
 	jboolean isCopy2;
 	jstring str = env->NewStringUTF(strBuf);
 	const jchar *new_chars = env->GetStringChars(str, &isCopy);
-	jchar * jchars = env->GetCharArrayElements(jchararray, &isCopy2);
-	for (int i = 0; i < size1; i++)
+	int size3 = static_cast<int>(env->GetStringUTFLength(str));
+	jchar * jchars = reinterpret_cast<jchar*>(env->GetPrimitiveArrayCritical(jchararray, &isCopy2));
+	
+	if (size3 != size)
+	{
+		std::cout << "NewStrLength ArrayLength does not match, received " << size << " asked " << size3 << std::endl;
+	}
+
+	for (int i = 0; i < size3 && i < size1; i++)
 	{
 		jchars[i] = new_chars[i];
+	}
+	for (int i = size3; i < size3+1 && i < size1; i++)
+	{
+		jchars[i] = '\0';
 	}
 }
 
@@ -49,7 +67,7 @@ static void ConvertToCharArrayArray(JNIEnv *env, jobjectArray jcharchar, char (&
 }
 
 template<int size1, int size2>
-static void ConvertFromCharArrayArray(JNIEnv *env, char (& new_chars)[size1][size2], jobjectArray&& jcharchar)
+static void ConvertFromCharArrayArray(JNIEnv *env, char (& new_chars)[size1][size2], jobjectArray jcharchar)
 {
 	int size = static_cast<int>(env->GetArrayLength(jcharchar));
 	if (size != size1)
@@ -81,7 +99,7 @@ static void ConvertToIntArray(JNIEnv *env, jintArray jintArray, int (& intBuf)[s
 }
 
 template<int size1>
-static void ConvertFromIntArray(JNIEnv *env,int (& intBuf)[size1],  jintArray&& jintarray)
+static void ConvertFromIntArray(JNIEnv *env,int (& intBuf)[size1],  jintArray jintarray)
 {
     jboolean isCopy;
 	int size = env->GetArrayLength(jintarray);
@@ -89,7 +107,7 @@ static void ConvertFromIntArray(JNIEnv *env,int (& intBuf)[size1],  jintArray&& 
 	{
 		std::cout << "ArrayLength does not match, received " << size << " asked " << size1 << std::endl;
 	}
-	jint *jints = env->GetIntArrayElements(jintarray, &isCopy);
+	jint *jints = reinterpret_cast<jint*>(env->GetPrimitiveArrayCritical(jintarray, &isCopy));
 	for (int i = 0; i < size1; i++)
 	{
 		jints[i] = static_cast<jint>(intBuf[i]);
@@ -115,7 +133,7 @@ static void ConvertToIntArrayArray(JNIEnv *env, jobjectArray jintint, int (& new
 
 
 template<int size1, int size2>
-static void ConvertFromIntArrayArray(JNIEnv *env, int (& new_ints)[size1][size2], jobjectArray&& jintint)
+static void ConvertFromIntArrayArray(JNIEnv *env, int (& new_ints)[size1][size2], jobjectArray jintint)
 {
 	int size = static_cast<int>(env->GetArrayLength(jintint));
 	if (size != size1)
@@ -146,7 +164,7 @@ static void ConvertToFloatArray(JNIEnv *env, jfloatArray jfloatarray, float (& f
 }
 
 template<int size1>
-static void ConvertFromFloatArray(JNIEnv *env, float (& floatBuf)[size1], jfloatArray&& jfloatarray)
+static void ConvertFromFloatArray(JNIEnv *env, float (& floatBuf)[size1], jfloatArray jfloatarray)
 {
 	jboolean isCopy;
 	int size = env->GetArrayLength(jfloatarray);
@@ -154,7 +172,7 @@ static void ConvertFromFloatArray(JNIEnv *env, float (& floatBuf)[size1], jfloat
 	{
 		std::cout << "ArrayLength does not match, received " << size << " asked " << size1 << std::endl;
 	}
-	jfloat *jfloats = const_cast<jfloat*>(env->GetFloatArrayElements(jfloatarray, &isCopy));
+	jfloat *jfloats = reinterpret_cast<jfloat*>(env->GetPrimitiveArrayCritical(jfloatarray, &isCopy));
 	for (int i = 0; i < size1; i++)
 	{
 		jfloats[i] = static_cast<jfloat>(floatBuf[i]);
@@ -180,7 +198,7 @@ static void ConvertToFloatArrayArray(JNIEnv *env, jobjectArray jfloatfloat, floa
 }
 
 template<int size1, int size2>
-static void ConvertFromFloatArrayArray(JNIEnv *env, float (& new_floats)[size1][size2], jobjectArray&& jfloatfloat)
+static void ConvertFromFloatArrayArray(JNIEnv *env, float (& new_floats)[size1][size2], jobjectArray jfloatfloat)
 {
 	jboolean isCopy;
 	int size = env->GetArrayLength(jfloatfloat);
